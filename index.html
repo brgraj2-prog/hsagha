@@ -254,7 +254,7 @@
 
         async function startTest(subjectId) {
             showView('loading');
-            const questions = await fetchData(`data/${subjectId}.json`);
+            const questions = await fetchData(`${subjectId}.json`);
             if (!questions) return;
             
             const subject = allSubjects.find(s => s.id === subjectId);
