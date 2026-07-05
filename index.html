@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- This is the critical line that fixes the Content Security Policy error on GitHub Pages -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.tailwindcss.com https://unpkg.com 'unsafe-inline' 'unsafe-eval';">
-    <title>AI NEET PG Prep - Static Edition</title>
+    <title>Priya PG Prep</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -70,7 +70,12 @@
                     <div class="bg-blue-100 text-blue-800 font-bold text-lg px-4 py-2 rounded-lg"><span id="timer">00:00</span></div>
                 </div>
                 <p id="question-text" class="text-lg text-gray-800 leading-relaxed mb-8"></p>
-                <div id="options-container" class="space-y-4 mb-8"></div>
+                <div id="options-container" class="space-y-4 mb-6"></div>
+                <div id="explanation-box" class="hidden mb-8 p-4 rounded-lg border bg-blue-50 border-blue-200">
+                    <p id="explanation-feedback" class="font-semibold mb-2"></p>
+                    <p class="text-sm font-semibold text-gray-700">Explanation:</p>
+                    <p id="explanation-text" class="text-sm text-gray-700"></p>
+                </div>
                 <div class="flex justify-between items-center">
                     <button id="prev-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition disabled:opacity-50">Previous</button>
                     <button id="next-btn" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">Next</button>
@@ -273,20 +278,48 @@
             document.getElementById('question-counter').textContent = `Question ${currentQuestionIndex + 1} of ${currentTest.questions.length}`;
             document.getElementById('question-text').textContent = question.text;
 
+            const selectedIndex = userAnswers[currentQuestionIndex];
+            const hasAnswered = selectedIndex !== null && selectedIndex !== undefined;
+
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
             question.options.forEach((option, index) => {
                 const button = document.createElement('button');
                 button.className = 'option-btn block w-full text-left p-4 border border-gray-300 rounded-lg hover:bg-gray-100 transition';
                 button.textContent = option;
-                if (userAnswers[currentQuestionIndex] === index) button.classList.add('selected');
-                button.addEventListener('click', () => selectAnswer(index));
+
+                if (hasAnswered) {
+                    if (index === question.answer) {
+                        button.classList.add('correct');
+                    } else if (index === selectedIndex) {
+                        button.classList.add('incorrect');
+                    }
+                    button.disabled = true;
+                    button.classList.add('cursor-not-allowed');
+                } else {
+                    button.addEventListener('click', () => selectAnswer(index));
+                }
                 optionsContainer.appendChild(button);
             });
+
+            const explanationBox = document.getElementById('explanation-box');
+            if (hasAnswered) {
+                const isCorrect = selectedIndex === question.answer;
+                const feedbackEl = document.getElementById('explanation-feedback');
+                feedbackEl.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+                feedbackEl.className = `font-semibold mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`;
+                document.getElementById('explanation-text').textContent = question.explanation || 'No explanation available.';
+                explanationBox.classList.remove('hidden');
+                explanationBox.className = `mb-8 p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`;
+            } else {
+                explanationBox.classList.add('hidden');
+            }
+
             updateNavigation();
         }
 
         function selectAnswer(index) {
+            if (userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex] !== undefined) return;
             userAnswers[currentQuestionIndex] = index;
             renderQuestion();
         }
