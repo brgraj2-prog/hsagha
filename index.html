@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- This is the critical line that fixes the Content Security Policy error on GitHub Pages -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdn.tailwindcss.com https://unpkg.com 'unsafe-inline' 'unsafe-eval';">
+    <title>AI NEET PG Prep - Static Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .view { display: none; }
+        .active-view { display: block; }
+        .option-btn.selected { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .option-btn.correct { background-color: #22c55e; color: white; border-color: #22c55e; }
+        .option-btn.incorrect { background-color: #ef4444; color: white; border-color: #ef4444; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                 <a href="#" id="home-link" class="flex items-center space-x-2 text-2xl font-bold text-blue-600">
+                     <i data-lucide="brain-circuit"></i>
+                     <span>AI NEET PG Prep</span>
+                 </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Loading View -->
+        <div id="loading-view" class="view active-view text-center py-16">
+            <h2 class="text-xl font-semibold text-gray-700">Loading Question Bank...</h2>
+        </div>
+
+        <!-- Subject Selection View -->
+        <div id="subjects-view" class="view">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">Choose a Subject</h1>
+            <div id="subject-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Subject cards will be injected here -->
+            </div>
+        </div>
+        
+        <!-- Topic/Test Selection View -->
+        <div id="topics-view" class="view">
+             <button id="back-to-subjects" class="mb-6 text-blue-600 hover:underline flex items-center space-x-2">
+                <i data-lucide="arrow-left"></i>
+                <span>Back to Subjects</span>
+             </button>
+             <h1 id="topic-view-title" class="text-3xl font-bold text-gray-900 mb-6">Available Tests</h1>
+             <div id="topic-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- A single test card will be injected here -->
+             </div>
+        </div>
+
+        <!-- Test Taking View -->
+        <div id="test-view" class="view max-w-4xl mx-auto">
+             <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 id="test-title" class="text-2xl font-bold text-gray-800">Test Title</h2>
+                        <p id="question-counter" class="text-sm text-gray-600">Question 1 of N</p>
+                    </div>
+                    <div class="bg-blue-100 text-blue-800 font-bold text-lg px-4 py-2 rounded-lg"><span id="timer">00:00</span></div>
+                </div>
+                <p id="question-text" class="text-lg text-gray-800 leading-relaxed mb-8"></p>
+                <div id="options-container" class="space-y-4 mb-8"></div>
+                <div class="flex justify-between items-center">
+                    <button id="prev-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition disabled:opacity-50">Previous</button>
+                    <button id="next-btn" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">Next</button>
+                    <button id="submit-btn" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition hidden">Submit Test</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="results-view" class="view max-w-2xl mx-auto text-center">
+             <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Test Completed!</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-8">
+                    <div class="bg-blue-100 p-4 rounded-lg"><p class="text-sm font-medium text-blue-800">Score</p><p id="result-score" class="text-3xl font-bold text-blue-900">0%</p></div>
+                    <div class="bg-green-100 p-4 rounded-lg"><p class="text-sm font-medium text-green-800">Correct</p><p id="result-correct" class="text-3xl font-bold text-green-900">0</p></div>
+                    <div class="bg-red-100 p-4 rounded-lg"><p class="text-sm font-medium text-red-800">Incorrect</p><p id="result-incorrect" class="text-3xl font-bold text-red-900">0</p></div>
+                </div>
+                <button id="back-to-home-btn" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition mb-6">Back to Home</button>
+                <div id="review-answers-container" class="text-left"></div>
+             </div>
+        </div>
+    </main>
+
+    <!-- 
+      This script tag contains the initial subjects data.
+      The python exporter script generates this. Embedding it directly
+      solves fetch errors in restrictive preview environments.
+    -->
+    <script id="subjects-data" type="application/json">
+      [
+        {"id": "anatomy", "title": "Anatomy", "questionCount": 2697},
+        {"id": "anesthesia", "title": "Anesthesia", "questionCount": 2223},
+        {"id": "biochemistry", "title": "Biochemistry", "questionCount": 2185},
+        {"id": "ent", "title": "ENT", "questionCount": 2262},
+        {"id": "forensic_medicine", "title": "Forensic Medicine", "questionCount": 2154},
+        {"id": "gynecology_and_obstetrics", "title": "Gynecology and Obstetrics", "questionCount": 2420},
+        {"id": "medicine", "title": "Medicine", "questionCount": 2364},
+        {"id": "microbiology", "title": "Microbiology", "questionCount": 2384},
+        {"id": "ophthalmology", "title": "Ophthalmology", "questionCount": 2276},
+        {"id": "orthopedics", "title": "Orthopedics", "questionCount": 2237},
+        {"id": "pathology", "title": "Pathology", "questionCount": 2390},
+        {"id": "pediatrics", "title": "Pediatrics", "questionCount": 2129},
+        {"id": "pharmacology", "title": "Pharmacology", "questionCount": 2351},
+        {"id": "physiology", "title": "Physiology", "questionCount": 2289},
+        {"id": "psychiatry", "title": "Psychiatry", "questionCount": 2305},
+        {"id": "radiology", "title": "Radiology", "questionCount": 2283},
+        {"id": "skin", "title": "Skin", "questionCount": 2228},
+        {"id": "social_and_preventive_medicine", "title": "Social and Preventive Medicine", "questionCount": 2293},
+        {"id": "surgery", "title": "Surgery", "questionCount": 2314}
+      ]
+    </script>
+    
+    <script>
+        // --- CONFIGURATION ------------------------------------------------------------------
+        // IMPORTANT: After uploading to GitHub Pages, replace this with your actual URL.
+        const GITHUB_PAGES_BASE_URL = 'https://your-username.github.io/your-repo-name/';
+
+        // --- STATE MANAGEMENT & UI ELEMENTS -----------------------------------------------
+        let allSubjects = [];
+        let currentTest = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let timerInterval = null;
+        const views = {
+            loading: document.getElementById('loading-view'),
+            subjects: document.getElementById('subjects-view'),
+            topics: document.getElementById('topics-view'),
+            test: document.getElementById('test-view'),
+            results: document.getElementById('results-view'),
+        };
+        
+        // --- VIEW CONTROLLER ----------------------------------------------------------------
+        function showView(viewName) {
+            Object.values(views).forEach(view => view.classList.remove('active-view'));
+            if (views[viewName]) {
+                views[viewName].classList.add('active-view');
+            }
+        }
+        
+        // --- DATA FETCHING ------------------------------------------------------------------
+        async function fetchData(filePath) {
+            const isLive = GITHUB_PAGES_BASE_URL && !GITHUB_PAGES_BASE_URL.includes('your-username');
+            const url = isLive ? GITHUB_PAGES_BASE_URL + filePath : filePath;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Network response was not ok for ${url}`);
+                return await response.json();
+            } catch (error) {
+                console.error(`Failed to fetch data from ${url}:`, error);
+                const loadingView = document.getElementById('loading-view');
+                loadingView.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                    <h2 class="font-bold">Error Loading Data</h2>
+                    <p class="mt-2">Could not load: <strong>${filePath}</strong>. Please ensure the 'data' folder and its files are correctly placed and the GitHub Pages URL is configured if deployed.</p>
+                </div>`;
+                showView('loading');
+                return null;
+            }
+        }
+
+        // --- APP LOGIC ----------------------------------------------------------------------
+        function populateSubjects() {
+            showView('loading');
+            try {
+                const subjectsDataElement = document.getElementById('subjects-data');
+                const subjects = JSON.parse(subjectsDataElement.textContent);
+                
+                if (!subjects || subjects.length === 0) {
+                    throw new Error("No subject data found in embedded script tag.");
+                }
+
+                allSubjects = subjects;
+                const grid = document.getElementById('subject-grid');
+                grid.innerHTML = '';
+                
+                subjects.forEach(subject => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-lg shadow-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer transform hover:-translate-y-1 transition-transform duration-300';
+                    card.innerHTML = `
+                        <div class="bg-blue-100 text-blue-600 rounded-full p-4 mb-4"><i data-lucide="activity"></i></div>
+                        <h3 class="text-xl font-bold text-gray-800">${subject.title}</h3>
+                        <p class="text-sm text-gray-500 mt-2">${subject.questionCount} Questions</p>`;
+                    card.addEventListener('click', () => showTopicsForSubject(subject.id));
+                    grid.appendChild(card);
+                });
+                
+                showView('subjects');
+                // **FIX:** Wrap the icon rendering in a try...catch block.
+                // This prevents the entire app from failing if the icon library has an issue.
+                try {
+                    lucide.createIcons();
+                } catch (iconError) {
+                    console.error("Lucide icon rendering failed:", iconError);
+                    // The app will continue to function without icons.
+                }
+
+            } catch (error) {
+                 console.error("Error processing embedded subject data:", error);
+                 const loadingView = document.getElementById('loading-view');
+                 loadingView.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                    <h2 class="font-bold">Fatal Error</h2>
+                    <p class="mt-2">Could not initialize the app. The embedded subject data is missing or invalid.</p>
+                </div>`;
+                showView('loading');
+            }
+        }
+
+        function showTopicsForSubject(subjectId) {
+            const subject = allSubjects.find(s => s.id === subjectId);
+            if (!subject) return;
+
+            document.getElementById('topic-view-title').textContent = `Test for ${subject.title}`;
+            const grid = document.getElementById('topic-grid');
+            grid.innerHTML = ''; 
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300';
+            const estimatedTime = Math.ceil((subject.questionCount || 0) * 45 / 60);
+            card.innerHTML = `
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Complete Question Bank</h3>
+                    <div class="flex items-center text-sm text-gray-500 mb-4">
+                        <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i><span>${subject.questionCount || 0} Questions</span>
+                        <i data-lucide="clock" class="w-4 h-4 ml-4 mr-2"></i><span>~${estimatedTime} Mins</span>
+                    </div>
+                    <button class="start-test-btn w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition" data-subject-id="${subject.id}">Start Test</button>
+                </div>`;
+            grid.appendChild(card);
+            
+            try {
+                lucide.createIcons();
+            } catch (iconError) {
+                console.error("Lucide icon rendering failed:", iconError);
+            }
+
+            grid.querySelector('.start-test-btn').addEventListener('click', (e) => startTest(e.currentTarget.dataset.subjectId));
+            showView('topics');
+        }
+        
+        document.getElementById('back-to-subjects').addEventListener('click', () => showView('subjects'));
+        document.getElementById('home-link').addEventListener('click', (e) => { e.preventDefault(); populateSubjects(); });
+
+        async function startTest(subjectId) {
+            showView('loading');
+            const questions = await fetchData(`data/${subjectId}.json`);
+            if (!questions) return;
+            
+            const subject = allSubjects.find(s => s.id === subjectId);
+            currentTest = { title: subject.title, questions: questions.sort(() => Math.random() - 0.5) };
+            currentQuestionIndex = 0;
+            userAnswers = new Array(currentTest.questions.length).fill(null);
+            showView('test');
+            renderQuestion();
+            startTimer(currentTest.questions.length * 45);
+        }
+
+        function renderQuestion() {
+            const question = currentTest.questions[currentQuestionIndex];
+            document.getElementById('test-title').textContent = currentTest.title;
+            document.getElementById('question-counter').textContent = `Question ${currentQuestionIndex + 1} of ${currentTest.questions.length}`;
+            document.getElementById('question-text').textContent = question.text;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn block w-full text-left p-4 border border-gray-300 rounded-lg hover:bg-gray-100 transition';
+                button.textContent = option;
+                if (userAnswers[currentQuestionIndex] === index) button.classList.add('selected');
+                button.addEventListener('click', () => selectAnswer(index));
+                optionsContainer.appendChild(button);
+            });
+            updateNavigation();
+        }
+
+        function selectAnswer(index) {
+            userAnswers[currentQuestionIndex] = index;
+            renderQuestion();
+        }
+
+        function updateNavigation() {
+            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+            const isLastQuestion = currentQuestionIndex === currentTest.questions.length - 1;
+            document.getElementById('next-btn').classList.toggle('hidden', isLastQuestion);
+            document.getElementById('submit-btn').classList.toggle('hidden', !isLastQuestion);
+        }
+        
+        document.getElementById('next-btn').addEventListener('click', () => { if (currentQuestionIndex < currentTest.questions.length - 1) { currentQuestionIndex++; renderQuestion(); } });
+        document.getElementById('prev-btn').addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderQuestion(); } });
+        document.getElementById('submit-btn').addEventListener('click', submitTest);
+
+        function startTimer(duration) { clearInterval(timerInterval); let timer = duration; const timerEl = document.getElementById('timer'); timerInterval = setInterval(() => { const minutes = Math.floor(timer / 60); let seconds = timer % 60; seconds = seconds < 10 ? '0' + seconds : seconds; timerEl.textContent = `${minutes}:${seconds}`; if (--timer < 0) submitTest(); }, 1000); }
+        function submitTest() { clearInterval(timerInterval); calculateResults(); showView('results'); }
+
+        function calculateResults() {
+            let correctCount = 0;
+            currentTest.questions.forEach((q, index) => { if (userAnswers[index] === q.answer) correctCount++; });
+            const total = currentTest.questions.length;
+            const score = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+            document.getElementById('result-score').textContent = `${score}%`;
+            document.getElementById('result-correct').textContent = correctCount;
+            document.getElementById('result-incorrect').textContent = total - correctCount;
+            renderAnswerReview();
+        }
+        
+        function renderAnswerReview() {
+            const container = document.getElementById('review-answers-container');
+            container.innerHTML = '<h3 class="text-2xl font-bold text-gray-800 mb-4 mt-8 border-t pt-6">Review Your Answers</h3>';
+            currentTest.questions.forEach((q, index) => {
+                 const userAnswerIndex = userAnswers[index];
+                 const isCorrect = userAnswerIndex === q.answer;
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = `mb-6 p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`;
+                 questionDiv.innerHTML = `<p class="font-semibold text-gray-800 mb-3">Q${index + 1}: ${q.text}</p>`;
+                 q.options.forEach((opt, optIndex) => {
+                     const optP = document.createElement('p');
+                     optP.className = 'p-2 rounded-md my-1 text-sm';
+                     let indicator = '';
+                     if (optIndex === q.answer) {
+                         optP.classList.add('bg-green-100', 'font-bold', 'text-green-800');
+                         indicator = '(Correct Answer)';
+                     }
+                     if (optIndex === userAnswerIndex && !isCorrect) {
+                         optP.classList.add('bg-red-100', 'text-red-800');
+                         indicator = '(Your Answer)';
+                     }
+                     optP.textContent = `${opt} ${indicator}`;
+                     questionDiv.appendChild(optP);
+                 });
+                 const explanationDiv = document.createElement('div');
+                 explanationDiv.className = 'mt-3 pt-3 border-t border-gray-200';
+                 explanationDiv.innerHTML = `<p class="font-semibold text-sm text-gray-700">Explanation:</p><p class="text-sm text-gray-600">${q.explanation}</p>`;
+                 questionDiv.appendChild(explanationDiv);
+                 container.appendChild(questionDiv);
+            });
+        }
+
+        document.getElementById('back-to-home-btn').addEventListener('click', () => { showView('subjects'); });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            populateSubjects();
+        });
+    </script>
+</body>
+</html>
+
