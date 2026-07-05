@@ -1,0 +1,107 @@
+[
+  {
+    "title": "Anaesthesia",
+    "id": "anaesthesia",
+    "questionCount": 2156
+  },
+  {
+    "title": "Anatomy",
+    "id": "anatomy",
+    "questionCount": 9922
+  },
+  {
+    "title": "Biochemistry",
+    "id": "biochemistry",
+    "questionCount": 5542
+  },
+  {
+    "title": "Dental",
+    "id": "dental",
+    "questionCount": 2774
+  },
+  {
+    "title": "ENT",
+    "id": "ent",
+    "questionCount": 2929
+  },
+  {
+    "title": "Forensic Medicine",
+    "id": "forensic-medicine",
+    "questionCount": 4052
+  },
+  {
+    "title": "Gynaecology & Obstetrics",
+    "id": "gynaecology-obstetrics",
+    "questionCount": 6924
+  },
+  {
+    "title": "Medicine",
+    "id": "medicine",
+    "questionCount": 9968
+  },
+  {
+    "title": "Microbiology",
+    "id": "microbiology",
+    "questionCount": 6930
+  },
+  {
+    "title": "Ophthalmology",
+    "id": "ophthalmology",
+    "questionCount": 4722
+  },
+  {
+    "title": "Orthopaedics",
+    "id": "orthopaedics",
+    "questionCount": 1786
+  },
+  {
+    "title": "Pathology",
+    "id": "pathology",
+    "questionCount": 9007
+  },
+  {
+    "title": "Pediatrics",
+    "id": "pediatrics",
+    "questionCount": 5364
+  },
+  {
+    "title": "Pharmacology",
+    "id": "pharmacology",
+    "questionCount": 7811
+  },
+  {
+    "title": "Physiology",
+    "id": "physiology",
+    "questionCount": 5874
+  },
+  {
+    "title": "Psychiatry",
+    "id": "psychiatry",
+    "questionCount": 3075
+  },
+  {
+    "title": "Radiology",
+    "id": "radiology",
+    "questionCount": 2819
+  },
+  {
+    "title": "Skin",
+    "id": "skin",
+    "questionCount": 1169
+  },
+  {
+    "title": "Social & Preventive Medicine",
+    "id": "social-preventive-medicine",
+    "questionCount": 7221
+  },
+  {
+    "title": "Surgery",
+    "id": "surgery",
+    "questionCount": 10002
+  },
+  {
+    "title": "Unknown",
+    "id": "unknown",
+    "questionCount": 2027
+  }
+]
