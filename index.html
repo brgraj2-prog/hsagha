@@ -306,8 +306,8 @@
             if (hasAnswered) {
                 const isCorrect = selectedIndex === question.answer;
                 const feedbackEl = document.getElementById('explanation-feedback');
-                feedbackEl.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
-                feedbackEl.className = `font-semibold mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`;
+                // feedbackEl.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect';
+                // feedbackEl.className = `font-semibold mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`;
                 document.getElementById('explanation-text').textContent = question.explanation || 'No explanation available.';
                 explanationBox.classList.remove('hidden');
                 explanationBox.className = `mb-8 p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`;
